@@ -21,24 +21,28 @@ function getPDORace(){
     }
 }
 function getAllRaces(){
-    $query = getPDORace()->prepare("select * from races");
-    $query->execute();
-    $datas = $query->fetchALL();
     $res = array();
-    foreach ($datas as $d) {
-        $new = new Race();
-        $new->id = $d['id_race'];
-        $new->location = $d['location'];
-        $new->date = $d['date'];
-        $new->ponies = [];
-        $query2 = getPDORace()->prepare("select * from poniesinraces where id_race=:id_r");
-        $query2->bindValue(":id_r", $new->id);
-        $query2->execute();
-        $ps = $query2->fetchALL();
-        foreach ($ps as $p) {
-            array_push($new->ponies, getPony($p['id_poney']));
+    try{
+        $query = getPDORace()->prepare("select * from races");
+        $query->execute();
+        $datas = $query->fetchALL();
+        foreach ($datas as $d) {
+            $new = new Race();
+            $new->id = $d['id_race'];
+            $new->location = $d['location'];
+            $new->date = $d['date'];
+            $new->ponies = [];
+            $query2 = getPDORace()->prepare("select * from poniesinraces where id_race=:id_r");
+            $query2->bindValue(":id_r", $new->id);
+            $query2->execute();
+            $ps = $query2->fetchALL();
+            foreach ($ps as $p) {
+                array_push($new->ponies, getPony($p['id_poney']));
+            }
+            array_push($res, $new);
         }
-        array_push($res, $new);
+    } catch (Exception $e) {
+        
     }
     return $res;
 }
